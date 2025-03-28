@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}Patterned Fingers{% endblock %}
+{% block content %}
+
+    <div class="chat-grid">
+
+        <!-- LEFT SIDEBAR: b-lang -->
+        <!-- b-lang sidebar -->
+        <div class="sidebar b-lang">
+            <h3>b-lang</h3>
+            {% for p in defined_patterns if p.language == 'BENJA' %}
+                <div class="pattern-unit">
+                    <strong>{{ p.title }}</strong><br>
+                    <small>{{ p.definition }}</small>
+                </div>
+            {% else %}
+                <div class="pattern-unit"><em>No patterns yet.</em></div>
+            {% endfor %}
+        </div>
+
+        <!-- BENJA MESSAGE THREAD -->
+        <div class="thread-column benja-thread">
+            <h2>Benja</h2>
+            {% for pattern in patterns if pattern.speaker == 'BENJA' %}
+                <div class="message {{ 'from-benja' if pattern.speaker == 'BENJA' else 'from-tori' }}">
+                    <strong>{{ pattern.title }}</strong>
+                    <div class="message-body" onmouseup="handlePluckSelection(this)">
+                        {{ pattern.body | mark_patterns }}
+                    </div>
+                </div>
+
+            {% endfor %}
+        </div>
+
+        <!-- CENTER COLUMN: f-lang (shared lexicon only, NOT a thread) -->
+        <!-- f-lang sidebar -->
+        <div class="sidebar f-lang">
+            <h3>f-lang</h3>
+            {% for p in defined_patterns if p.language == 'TEMP-FAMILECT' %}
+                <div class="pattern-unit">
+                    <strong>{{ p.title }}</strong><br>
+                    <small>{{ p.definition }}</small>
+                </div>
+            {% else %}
+                <div class="pattern-unit"><em>No patterns yet.</em></div>
+            {% endfor %}
+        </div>
+
+        <!-- TORI MESSAGE THREAD -->
+        <div class="thread-column tori-thread">
+            <h2>Tori</h2>
+            {% for pattern in patterns if pattern.speaker == 'TORI' %}
+                <div class="message {{ 'from-benja' if pattern.speaker == 'BENJA' else 'from-tori' }}">
+                    <strong>{{ pattern.title }}</strong>
+                    <div class="message-body" onmouseup="handlePluckSelection(this)">
+                        {{ pattern.body | mark_patterns  }}
+                    </div>
+                </div>
+
+            {% endfor %}
+        </div>
+
+        <!-- RIGHT SIDEBAR: t-lang -->
+        <!-- t-lang sidebar -->
+        <div class="sidebar t-lang">
+            <h3>t-lang</h3>
+            {% for p in defined_patterns if p.language == 'TORI' %}
+                <div class="pattern-unit">
+                    <strong>{{ p.title }}</strong><br>
+                    <small>{{ p.definition }}</small>
+                </div>
+            {% else %}
+                <div class="pattern-unit"><em>No patterns yet.</em></div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- COMPOSER ZONE -->
+    <div class="composer-zone">
+
+        <!-- LEFT: BENJA pattern crafting -->
+        <div class="craft-area">
+            <h4>define b-lang pattern</h4>
+            <form method="POST">
+                <input type="hidden" name="form_type" value="pattern">
+                <input type="hidden" name="language" value="BENJA">
+                <input type="text" name="title" placeholder="pattern title" required><br>
+                <textarea name="definition" placeholder="define the pattern..." required></textarea><br>
+                <button type="submit">Add to b-lang</button>
+            </form>
+        </div>
+
+        <!-- MIDDLE: message form (unchanged) -->
+        <div class="central-compose">
+            <form method="POST">
+                <input type="hidden" name="form_type" value="message">
+                <input type="text" name="title" placeholder="message title" required><br>
+                <select name="speaker" required>
+                    <option value="BENJA">BENJA</option>
+                    <option value="TORI">TORI</option>
+                </select>
+                <select name="language" required>
+                    <option value="TEMP-FAMILECT">f-lang</option>
+                    <option value="BENJA">b-lang</option>
+                    <option value="TORI">t-lang</option>
+                </select>
+                <div contenteditable="true" id="pattern-editor" class="editor" placeholder="Type your pattern..."></div>
+                <input type="hidden" name="body" id="pattern-body">
+                <button type="submit">Send</button>
+            </form>
+        </div>
+
+        <!-- RIGHT: TORI pattern crafting -->
+        <div class="craft-area">
+            <h4>define t-lang pattern</h4>
+            <form method="POST">
+                <input type="hidden" name="form_type" value="pattern">
+                <input type="hidden" name="language" value="TORI">
+                <input type="text" name="title" placeholder="pattern title" required><br>
+                <textarea name="definition" placeholder="define the pattern..." required></textarea><br>
+                <button type="submit">Add to t-lang</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="pluckModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Pluck Pattern</h3>
+            <form method="POST" id="pluckForm">
+                <input type="hidden" name="form_type" value="pattern">
+
+                <label>Title:<br>
+                    <input type="text" name="title" id="pluckTitle" placeholder="Enter title">
+                </label><br><br>
+
+                <label>Definition:<br>
+                    <textarea name="definition" id="pluckDefinition" required></textarea>
+                </label><br><br>
+
+                <label>Lexicon:<br>
+                    <select name="language" required>
+                        <option value="TEMP-FAMILECT">f-lang</option>
+                        <option value="BENJA">b-lang</option>
+                        <option value="TORI">t-lang</option>
+                    </select>
+                </label><br><br>
+
+                <button type="submit">Define</button>
+                <button type="button" onclick="closePluckModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll("form").forEach(form => {
+            form.addEventListener("submit", function (e) {
+                const editor = form.querySelector("#pattern-editor");
+                const hiddenBody = form.querySelector("#pattern-body");
+                if (editor && hiddenBody) {
+                    hiddenBody.value = editor.innerHTML;
+                }
+            });
+        });
+
+        function handlePluckSelection(container) {
+            const selection = window.getSelection();
+            const text = selection.toString().trim();
+
+            if (text.length > 0) {
+                openPluckModal(text);
+            }
+        }
+
+        function openPluckModal(selectedText) {
+            document.getElementById("pluckDefinition").value = selectedText;
+            document.getElementById("pluckTitle").value = "";
+            document.getElementById("pluckModal").classList.remove("hidden");
+        }
+
+        function closePluckModal() {
+            document.getElementById("pluckModal").classList.add("hidden");
+        }
+    </script>
+
+
+{% endblock %}

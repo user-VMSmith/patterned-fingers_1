@@ -1,10 +1,12 @@
+<!-- templates/base.html -->
 <!doctype html>
 <html>
 <head>
-  <title>Patterned Fingers</title>
+  <title>{% block title %}Patterned Fingers{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8">
 </head>
 <body>
-  <h1>Hello, Patterned Fingers 👋</h1>
+  {% block content %}{% endblock %}
 </body>
 </html>
