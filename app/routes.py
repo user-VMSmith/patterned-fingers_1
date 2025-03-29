@@ -55,30 +55,37 @@ def mark_patterns(text):
     import re
     from markupsafe import Markup
 
-    # use title → language map
     pattern_map = {p['title']: p['language'] for p in defined_patterns}
     if not pattern_map:
         return text
 
-    # escape titles for regex
-    titles = [re.escape(title) for title in pattern_map.keys()]
+    titles = [re.escape(title) for title in pattern_map]
     pattern = re.compile(r'\b(' + '|'.join(titles) + r')\b', re.IGNORECASE)
 
-    emoji_for_lang = {
-        'BENJA': '🧠',
-        'TEMP-FAMILECT': '🌱',
-        'TORI': '🐚'
+    # Getting rid of emojis for now
+    # emoji_for_lang = {
+    #     'BENJA': '🐚',
+    #     'TEMP-FAMILECT': '🌱',
+    #     'TORI': '🧠'
+    # }
+
+    class_for_lang = {
+        'BENJA': 'ref-benja',
+        'TEMP-FAMILECT': 'ref-flang',
+        'TORI': 'ref-tori'
     }
 
     def replacer(match):
         raw_title = match.group(0)
-        # find the actual pattern title used (case-insensitive match)
         title = next((t for t in pattern_map if t.lower() == raw_title.lower()), raw_title)
         lang = pattern_map.get(title, '')
-        emoji = emoji_for_lang.get(lang, '❔')
-        return f'<span class="pattern-ref">{emoji} {title}</span>'
+        # Getting rid of emojis for now
+        # emoji = emoji_for_lang.get(lang, '❔')
+        css_class = class_for_lang.get(lang, 'ref-unknown')
+        return f'<span class="pattern-ref {css_class}">{title}</span>'
 
     result = pattern.sub(replacer, text)
     return Markup(result)
+
 
 

@@ -44,8 +44,8 @@ body {
 }
 
 .from-tori {
-  border-left-color: #ffcc80;
-  background: #fff8e1;
+  border-left-color: #f28b82;
+  background: #fde2e4;
 }
 
 .message-body {
@@ -116,10 +116,27 @@ body {
 }
 
 .pattern-ref {
-  background: #dcedc8;
   padding: 2px 4px;
   border-radius: 4px;
   font-size: 0.85em;
   font-weight: bold;
 }
+
+/* match thread background colors */
+.ref-benja {
+  background: #d0e6fb;
+  border: 1px solid #90caf9;
+}
+
+.ref-flang {
+  background: #d3ebc3;
+  border: 1px solid #a5d6a7;
+}
+
+.ref-tori {
+  background: #fac7cd;
+  border: 1px solid #f28b82;
+}
+
+
 
